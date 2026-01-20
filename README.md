@@ -12,6 +12,11 @@
 - Avoid redundant downloads with optional caching.
 - Get detailed logs with verbose mode.
 - **Bulk download**: Supply a text file with a list of extensions to download them all at once!
+- **Platform-specific downloads**: Support for platform-specific extension versions (linux-x64, win32-x64, darwin-arm64, etc.).
+
+## Download Source
+
+Extensions are downloaded from the [OpenVSX Registry](https://open-vsx.org/), an open-source registry for VS Code extensions. The tool queries the VS Code Marketplace API for extension metadata and version information, then downloads the VSIX files from OpenVSX.
 
 ## Installation
 
@@ -64,6 +69,7 @@ code --install-extension ./extensions/ms-python.python-2023.17.12561009.vsix
 - `--proxy` to use a proxy server.
 - `--json`  Output result as JSON.
 - `--target-platform` VS Code target platform (e.g. win32-x64, linux-x64, darwin-arm64).
+- `--ignore-ssl` Ignore SSL certificate verification errors.
 
 ## Contributing
 
