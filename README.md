@@ -12,6 +12,7 @@
 - Avoid redundant downloads with optional caching.
 - Get detailed logs with verbose mode.
 - **Bulk download**: Supply a text file with a list of extensions to download them all at once!
+- **SSL verification control**: Bypass SSL certificate verification for environments with self-signed certificates or SSL inspection proxies.
 
 ## Installation
 
@@ -49,6 +50,14 @@ To download multiple extensions, you can use a text file where each line is an e
 offvsix --file extensions.txt
 ```
 
+### Using with SSL Verification Disabled:
+
+For environments with self-signed certificates or SSL inspection proxies:
+
+```bash
+offvsix ms-python.python --ignore-ssl
+```
+
 ### Install downloaded extension
 ```bash
 code --install-extension ./extensions/ms-python.python-2023.17.12561009.vsix
@@ -64,6 +73,7 @@ code --install-extension ./extensions/ms-python.python-2023.17.12561009.vsix
 - `--proxy` to use a proxy server.
 - `--json`  Output result as JSON.
 - `--target-platform` VS Code target platform (e.g. win32-x64, linux-x64, darwin-arm64).
+- `--ignore-ssl` to ignore SSL certificate verification errors.
 
 ## Contributing
 
