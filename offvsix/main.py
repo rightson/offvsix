@@ -125,14 +125,19 @@ class VSCodeExtensionDownloader:
                     self._print(f"Extension not found: {ext_id}")
                     return {"ok": False, "extension": ext_id, "error": "not_found", "message": f"Extension not found: {ext_id}"}
 
+            if self.target_platform:
+                filename = f"{publisher}.{extension_name}-{version}@{self.target_platform}.vsix"
+            else:
+                filename = f"{publisher}.{extension_name}-{version}.vsix"
+
             if destination:
                 if not os.path.exists(destination):
                     os.makedirs(destination)
-                file_path = os.path.join(destination, f"{publisher}.{extension_name}-{version}.vsix")
+                file_path = os.path.join(destination, filename)
             else:
                 if not os.path.exists("extensions"):
                     os.makedirs("extensions")
-                file_path = os.path.join("extensions", f"{publisher}.{extension_name}-{version}.vsix")
+                file_path = os.path.join("extensions", filename)
 
             if not no_cache and os.path.exists(file_path):
                 self._print(f"File {file_path} already exists.")
@@ -148,13 +153,9 @@ class VSCodeExtensionDownloader:
                 }
 
             if self.target_platform:
-                download_url = (
-                    f"https://marketplace.visualstudio.com/_apis/public/gallery/publishers/"
-                    f"{publisher}/vsextensions/{extension_name}/{version}/vspackage"
-                    f"?targetPlatform={self.target_platform}"
-                )
+                download_url = f"https://openvsx.eclipsecontent.org/{publisher}/{extension_name}/{self.target_platform}/{version}/{publisher}.{extension_name}-{version}@{self.target_platform}.vsix"
             else:
-                download_url = f"https://{publisher}.gallery.vsassets.io/_apis/public/gallery/publisher/{publisher}/extension/{extension_name}/{version}/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage"
+                download_url = f"https://openvsx.eclipsecontent.org/{publisher}/{extension_name}/{version}/{publisher}.{extension_name}-{version}.vsix"
 
             self._print(f"Downloading version {version}...")
             try:
