@@ -5,7 +5,7 @@ import os
 
 class VSCodeExtensionDownloader:
 
-    def __init__(self, extension, proxy=None, version=None, destination=None, no_cache=False, print=False, target_platform=None):
+    def __init__(self, extension, proxy=None, version=None, destination=None, no_cache=False, print=False, target_platform=None, ignore_ssl=False):
         self.extension = extension
         self.proxy = proxy
         self.version = version
@@ -13,6 +13,7 @@ class VSCodeExtensionDownloader:
         self.no_cache = no_cache
         self.print = print
         self.target_platform = target_platform
+        self.ignore_ssl = ignore_ssl
 
     def _print(self, msg):
         if self.print:
@@ -69,7 +70,7 @@ class VSCodeExtensionDownloader:
 
             self._print("Querying Marketplace API...")
             try:
-                response = session.post(api_url, headers=headers, data=payload, timeout=20)
+                response = session.post(api_url, headers=headers, data=payload, timeout=20, verify=not self.ignore_ssl)
             except requests.RequestException as e:
                 self._print(f"Failed to query Marketplace API: {e}")
                 return {
@@ -157,7 +158,7 @@ class VSCodeExtensionDownloader:
 
             self._print(f"Downloading version {version}...")
             try:
-                download_response = session.get(download_url, timeout=60)
+                download_response = session.get(download_url, timeout=60, verify=not self.ignore_ssl)
             except requests.RequestException as e:
                 self._print(f"Failed to download asset: {e}")
                 return {
@@ -192,7 +193,7 @@ class VSCodeExtensionDownloader:
                     "message": f"Failed to download {publisher}.{extension_name}-{version}.vsix"
                 }
 
-def download_plugins_from_file(file_path: str, proxy=None, version=None, destination=None, no_cache=False, verbose=False, target_platform=None):
+def download_plugins_from_file(file_path: str, proxy=None, version=None, destination=None, no_cache=False, verbose=False, target_platform=None, ignore_ssl=False):
     results = []
     if not os.path.exists(file_path):
         print(f"File not found: {file_path}")
@@ -202,7 +203,7 @@ def download_plugins_from_file(file_path: str, proxy=None, version=None, destina
     for extension in extensions:
         extension = extension.strip()
         if extension:
-            downloader = VSCodeExtensionDownloader(extension, proxy, version, destination, no_cache, verbose, target_platform=target_platform)
+            downloader = VSCodeExtensionDownloader(extension, proxy, version, destination, no_cache, verbose, target_platform=target_platform, ignore_ssl=ignore_ssl)
             res = downloader.download()
             results.append(res)
     return results
@@ -217,13 +218,14 @@ def download_plugins_from_file(file_path: str, proxy=None, version=None, destina
 @click.option('--proxy', default=None, help='Proxy URL.')
 @click.option('--json', 'as_json', is_flag=True, default=False, help='Output result as JSON.')
 @click.option('--target-platform', default=None, help='VS Code target platform (e.g. win32-x64, linux-x64, darwin-arm64).')
-def cli(extension, file, proxy, version, destination, no_cache, no_print, as_json, target_platform):
+@click.option('--ignore-ssl', is_flag=True, default=False, help='Ignore SSL certificate verification errors.')
+def cli(extension, file, proxy, version, destination, no_cache, no_print, as_json, target_platform, ignore_ssl):
     if file:
-        results = download_plugins_from_file(file, proxy, version, destination, no_cache, False if as_json else no_print, target_platform=target_platform)
+        results = download_plugins_from_file(file, proxy, version, destination, no_cache, False if as_json else no_print, target_platform=target_platform, ignore_ssl=ignore_ssl)
         if as_json:
             print(json.dumps({"results": results}, ensure_ascii=False))
     elif extension:
-        downloader = VSCodeExtensionDownloader(extension, proxy, version, destination, no_cache, False if as_json else no_print, target_platform=target_platform)
+        downloader = VSCodeExtensionDownloader(extension, proxy, version, destination, no_cache, False if as_json else no_print, target_platform=target_platform, ignore_ssl=ignore_ssl)
         res = downloader.download()
         if as_json:
             print(json.dumps(res, ensure_ascii=False))
